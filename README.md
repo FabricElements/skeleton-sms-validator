@@ -1,14 +1,21 @@
-# Set up new projects
-Base configuration files for your projects
+# \<skeleton-sms-validator\>
 
-## Configurations
 
-* [Polymer](./Polymer.md)
 
-## Contributing
+## Install the Polymer-CLI
 
-Please check [CONTRIBUTING](./CONTRIBUTING.md).
+First, make sure you have the [Polymer CLI](https://www.npmjs.com/package/polymer-cli) installed. Then run `polymer serve` to serve your element locally.
 
-## License
+## Viewing Your Element
 
-Released under the [BSD 3-Clause License](./LICENSE.md).
+```
+$ polymer serve
+```
+
+## Running Tests
+
+```
+$ polymer test
+```
+
+Your application is already set up to be tested via [web-component-tester](https://github.com/Polymer/web-component-tester). Run `polymer test` to run your application's test suite locally.
