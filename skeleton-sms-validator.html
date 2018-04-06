@@ -1,0 +1,114 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../paper-input/paper-textarea.html">
+
+<dom-module id="skeleton-sms-validator">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      paper-textarea[invalid]:focus {
+        --paper-input-container-input: {
+          outline: red;
+        } 
+      }
+    </style>
+    
+    <paper-textarea label="Enter message"
+                    value="{{text}}"
+                    invalid$="[[invalid]]"></paper-textarea>
+  </template>
+
+  <script src="./encoder-utils.js"></script>
+
+  <script>
+    /**
+     * `skeleton-sms-validator`
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class SkeletonSmsValidator extends Polymer.Element {
+      /**
+       * @return {string}
+      */
+      static get is() {
+        return 'skeleton-sms-validator';
+      }
+
+      /**
+       * @return {object}
+      */
+      static get properties() {
+        return {
+          type: {
+            type: String,
+            value: null,
+            reflectToAttribute: true,
+            notify: true,
+          },
+          segments: {
+            type: Array,
+            value: [],
+            reflectToAttribute: true,
+            notify: true,
+          },
+          invalid: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true,
+            notify: true,
+          },
+          text: {
+            type: String,
+            value: null,
+            observer: '_textObserver',
+          },
+          data: {
+            type: String,
+            value: null,
+            reflectToAttribute: true,
+            notify: true,
+          },
+        };
+      }
+
+      /**
+       * Text Observer
+       *
+       * @param {string} text
+      */
+      _textObserver(text) {
+        if (!text) return;
+
+        const inputChars = encoderUtils.unicodeCharacters(text);
+
+        this.type = encoderUtils.pickencoding(inputChars);
+
+        const segments = this.type === 'gsm'
+          ? encoderUtils._segmentWith(
+            160,
+            153,
+            encoderUtils.encodeCharGsm)(inputChars)
+          : encoderUtils._segmentWith(
+            140,
+            134,
+            encoderUtils.encodeCharUtf16)(inputChars);
+
+        this.segments = segments.map((s) => s.bytes);
+
+        this.invalid = this.segments.length > 1;
+
+        if (!this.invalid) {
+          this.data = text;
+        } else {
+          this.data = null;
+        }
+      }
+    }
+
+    window.customElements.define(SkeletonSmsValidator.is, SkeletonSmsValidator);
+  </script>
+</dom-module>

@@ -48,6 +48,7 @@
   },
   "globals": {
     "a11ySuite": true,
+    "encoderUtils": true,
     "Fabric": true,
     "firebase": true,
     "fixture": true,
