@@ -64,6 +64,8 @@
           text: {
             type: String,
             value: null,
+            notify: true,
+            reflectToAttribute: true,
             observer: '_textObserver',
           },
           data: {
@@ -71,6 +73,10 @@
             value: null,
             reflectToAttribute: true,
             notify: true,
+          },
+          segmentsQty: {
+            type: Number,
+            value: 2,
           },
         };
       }
@@ -99,7 +105,7 @@
 
         this.segments = segments.map((s) => s.bytes);
 
-        this.invalid = this.segments.length > 1;
+        this.invalid = this.segments.length > this.segmentsQty;
 
         if (!this.invalid) {
           this.data = text;
