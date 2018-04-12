@@ -13,11 +13,24 @@
           outline: red;
         } 
       }
+
+      .char-counter {
+        display: flex;
+        justify-content: flex-end;
+        color: var(--paper-indigo-900)
+      }
+
+      .char-counter p {
+        margin: 0;
+      }
     </style>
     
     <paper-textarea label="Enter message"
                     value="{{text}}"
                     invalid$="[[invalid]]"></paper-textarea>
+    <div class="char-counter">
+      <p>[[charCounter]] / [[limit]]</p>
+    </div>
   </template>
 
   <script src="./encoder-utils.js"></script>
@@ -54,6 +67,7 @@
             value: [],
             reflectToAttribute: true,
             notify: true,
+            observer: '_segmentsObserver',
           },
           invalid: {
             type: Boolean,
@@ -64,6 +78,8 @@
           text: {
             type: String,
             value: null,
+            notify: true,
+            reflectToAttribute: true,
             observer: '_textObserver',
           },
           data: {
@@ -72,13 +88,39 @@
             reflectToAttribute: true,
             notify: true,
           },
+          limit: {
+            type: Number,
+            value: null,
+          },
+          segmentsQty: {
+            type: Number,
+            value: 2,
+          },
+          charCounter: {
+            type: Array,
+            value: [],
+          },
         };
+      }
+
+      /**
+       * Observers
+       *
+       * @return {array}
+       */
+       static get observers() {
+        return [
+          // Observer method name, followed by a list of dependencies in
+          // parenthesis
+          '_messagesObserver(segments, type, segmentsQty)',
+        ];
       }
 
       /**
        * Text Observer
        *
        * @param {string} text
+       * @private
       */
       _textObserver(text) {
         if (!text) return;
@@ -99,12 +141,53 @@
 
         this.segments = segments.map((s) => s.bytes);
 
-        this.invalid = this.segments.length > 1;
+        this.invalid = this.segments.length > this.segmentsQty;
 
         if (!this.invalid) {
           this.data = text;
         } else {
           this.data = null;
+        }
+      }
+
+      /**
+       * Text Observer
+       *
+       * @private
+       */
+      _segmentsObserver() {
+        if (!this.segments) return;
+
+        const totalChars = this.segments
+          .map((arr) => arr.reduce((acc, b) => acc + b.length, 0))
+          .reduce((acc, b) => acc + b, 0);
+
+        this.charCounter = totalChars;
+      }
+
+      /**
+       * Messages Observer
+       *
+       * @param {Array} segments
+       * @param {string} type
+       * @param {number} segmentsQty
+       * @private
+       */
+      _messagesObserver(segments, type, segmentsQty) {
+        if (!type) return;
+
+        if (type === 'gsm') {
+          if (segments.length <= 1) {
+            this.limit = 160 * segmentsQty;
+          } else {
+            this.limit = 153 * segmentsQty;
+          }
+        } else {
+          if (segments.length <= 1) {
+            this.limit = 140 * segmentsQty;
+          } else {
+            this.limit = 134 * segmentsQty;
+          }
         }
       }
     }
