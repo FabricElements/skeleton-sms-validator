@@ -29,8 +29,9 @@
           <dom-bind>
             <template>
               <skeleton-sms-validator 
-                type="{{type}}"
-                segments="{{segments}}"></skeleton-sms-validator>
+                segments="{{segments}}"
+                text="{{text}}"
+                type="{{type}}"></skeleton-sms-validator>
               <div>
                 <p>Type: [[type]]</p>
                 <p>SMS Segments: [[segments.length]]</p>
