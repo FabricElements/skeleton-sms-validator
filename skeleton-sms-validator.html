@@ -23,6 +23,31 @@
       .char-counter p {
         margin: 0;
       }
+
+      .character {
+        border-radius: 3px;
+        border: 1px solid white;
+        color: white;
+        display: inline-block;
+        font-size: 14px;
+        height: 1.5em;
+        line-height: 1.5;
+        text-align: center;
+        vertical-align: top;
+        width: 1.5em;
+      }
+
+      .character.gsm {
+        background-color: var(--paper-blue-200);
+      }
+
+      .character.gsm.double-char {
+        background-color: var(--paper-orange-300);
+      }
+
+      .character.ucs2 {
+        background-color: var(--paper-red-400);
+      }
     </style>
     
     <paper-textarea label="Enter message"
@@ -30,6 +55,32 @@
                     invalid$="[[invalid]]"></paper-textarea>
     <div class="char-counter">
       <p>[[charCounter]] / [[limit]]</p>
+    </div>
+    <div class="message">
+      <p class="message-data"></p>
+      <h4>LEGEND</h4>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <span class="character gsm"></span>
+            </td>
+            <td>Regular GSM character</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="character gsm double-char"></span>
+            </td>
+            <td>GSM character that can be used for the cost of two characters</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="character ucs2"></span>
+            </td>
+            <td>Character not present in GSM charset, forces to use UCS2 encoding</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </template>
 
@@ -113,6 +164,7 @@
           // Observer method name, followed by a list of dependencies in
           // parenthesis
           '_messagesObserver(segments, type, segmentsQty)',
+          '_charsObserver(text)',
         ];
       }
 
@@ -151,7 +203,7 @@
       }
 
       /**
-       * Text Observer
+       * Segments Observer
        *
        * @private
        */
@@ -189,6 +241,43 @@
             this.limit = 134 * segmentsQty;
           }
         }
+      }
+
+      /**
+       * Chars Observer
+       *
+       * @param {string} text
+       * @private
+       */
+       _charsObserver(text) {
+        if (!text) return;
+
+        const charData = this.shadowRoot.querySelector('.message-data');
+        const fragment = document.createDocumentFragment();
+
+        encoderUtils.unicodeCodePoints(text).map((char) => {
+          const span = document.createElement('span');
+
+          span.textContent = String.fromCodePoint(char);
+
+          span.classList.add('character');
+          if (char in unicodeToGsm) {
+            span.classList.add('gsm');
+            if (unicodeToGsm[char].length > 1) {
+              span.classList.add('double-char');
+            }
+          } else {
+            span.classList.add('ucs2');
+          }
+
+          return span;
+        }).reduce((acc, span) => {
+          acc.appendChild(span);
+          return acc;
+        }, fragment);
+
+        charData.innerHTML = '';
+        charData.appendChild(fragment);
       }
     }
 

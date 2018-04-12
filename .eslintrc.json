@@ -55,6 +55,7 @@
     "flush": true,
     "MockInteractions": true,
     "Polymer": true,
+    "unicodeToGsm": true,
     "WCT": true
   }
 }
