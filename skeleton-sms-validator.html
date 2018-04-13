@@ -83,7 +83,7 @@
     </style>
     <div id="text-box">
       <paper-textarea label="Message"
-                      value="{{text}}"
+                      value="{{value}}"
                       invalid$="[[invalid]]">
       </paper-textarea>
       <div id="text-box-footer">
@@ -135,80 +135,99 @@
        */
       static get properties() {
         return {
+          /**
+           * The encoding type
+           */
           type: {
             type: String,
             value: null,
             reflectToAttribute: true,
             notify: true,
           },
+          /**
+           * SMS chars array
+           */
           characters: {
             type: Array,
             value: [],
             reflectToAttribute: true,
             notify: true,
           },
+          /**
+           * SMS parts
+           */
           segments: {
             type: Number,
             value: 0,
             reflectToAttribute: true,
             notify: true,
           },
+          /**
+           * True if SMS parts exceed limitSegments
+           */
           invalid: {
             type: Boolean,
             value: false,
             reflectToAttribute: true,
             notify: true,
           },
-          text: {
+          /**
+           * The text value
+           */
+          value: {
             type: String,
             value: null,
             notify: true,
             reflectToAttribute: true,
             observer: '_textObserver',
           },
-          data: {
-            type: String,
-            value: null,
-            reflectToAttribute: true,
-            notify: true,
-            computed: '_computeData(invalid, text)',
-          },
+          /**
+           * Limits the parts an SMS should have
+           */
           limitSegments: {
             type: Number,
             value: 2,
           },
+          /**
+           * The input char counter
+           */
           charCounter: {
             type: Array,
             value: [],
+            readOnly: true,
             computed: '_computeCharCounter(characters)',
           },
+          /**
+           * Limits the char qty by encoding type and segments limit
+           */
           _limit: {
             type: Number,
             value: 0,
-            computed: '_computeLimit(characters, type, limitSegments)',
+            readOnly: true,
+            computed: '_computeLimit(segments, type, limitSegments)',
           },
+          /**
+           * GSM label
+           */
           labelGsm: {
             type: String,
             value: 'GSM character',
           },
+          /**
+           * GSM double chars label
+           */
           labelGsmDouble: {
             type: String,
             value: 'GSM character that costs two characters',
           },
+          /**
+           * UCS2 label
+           */
           labelUcs2: {
             type: String,
             value: 'Character forces UCS2 encoding',
           },
         };
-      }
-
-      /**
-       * Observers
-       *
-       * @return {array}
-       */
-      static get observers() {
-        return [];
       }
 
       /**
@@ -232,7 +251,7 @@
         this.characters = encoderUtils.unicodeCodePoints(baseText)
           .map((char, index) => {
             const encode = (char in unicodeToGsm) ? 'gsm' : 'ucs2';
-            const bytes = segmentBytes[index] ? segmentBytes[index] : 0;
+            const bytes = segmentBytes[index] ? segmentBytes[index] : [];
             const isDouble = (encode === 'gsm' && unicodeToGsm[char] && unicodeToGsm[char].length > 1);
             return {
               text: String.fromCodePoint(char),
@@ -247,20 +266,20 @@
       }
 
       /**
-       * Segments Observer
+       * Compute char counter
        *
-       * @param {Array} segments
+       * @param {Array} chars
        * @return {number}
        * @private
        */
-      _computeCharCounter(segments) {
-        return segments.map((arr) => arr.charBytes.length).reduce((a, b) => a + b, 0);
+      _computeCharCounter(chars) {
+        return chars.map((arr) => arr.charBytes.length).reduce((a, b) => a + b, 0);
       }
 
       /**
        * Messages Observer
        *
-       * @param {Array} segments
+       * @param {number} segments
        * @param {string} type
        * @param {number} limitSegments
        * @return {number}
@@ -268,29 +287,17 @@
        */
       _computeLimit(segments, type, limitSegments) {
         if (type === 'gsm') {
-          if (segments.length <= 1) {
+          if (segments <= 1) {
             return 160 * limitSegments;
           } else {
             return 153 * limitSegments;
           }
         }
-        if (segments.length <= 1) {
+        if (segments <= 1) {
           return 140 * limitSegments;
         } else {
           return 134 * limitSegments;
         }
-      }
-
-      /**
-       * Compute data
-       *
-       * @param {boolean} invalid
-       * @param {string|null} text
-       * @return {string}
-       * @private
-       */
-      _computeData(invalid, text) {
-        return invalid ? null : text;
       }
 
       /**
