@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../paper-input/paper-textarea.html">
+<link rel="import" href="../paper-tooltip/paper-tooltip.html">
 
 <dom-module id="skeleton-sms-validator">
   <template>
@@ -8,16 +9,41 @@
         display: block;
       }
 
-      paper-textarea[invalid]:focus {
+      #text-box {
+        display: block;
+        position: relative;
+      }
+
+      paper-textarea[invalid] {
         --paper-input-container-input: {
-          outline: red;
-        } 
+          outline: var(--paper-red-500);
+        }
+      }
+
+      #text-box-footer {
+        @apply --layout-horizontal;
+      }
+
+      #message-type {
+        @apply --paper-font-caption;
+        background-color: var(--paper-grey-900);
+        color: white;
+        font-weight: bold;
+        border-radius: 5px;
+        padding: 0 5px;
+      }
+
+      #message-segments {
+        @apply --paper-font-caption;
       }
 
       .char-counter {
-        display: flex;
-        justify-content: flex-end;
-        color: var(--paper-indigo-900)
+        color: var(--paper-indigo-900);
+        @apply --paper-font-caption;
+      }
+
+      .char-counter[invalid] {
+        color: var(--paper-red-500);
       }
 
       .char-counter p {
@@ -25,7 +51,7 @@
       }
 
       .character {
-        border-radius: 3px;
+        border-radius: 5px;
         border: 1px solid white;
         color: white;
         display: inline-block;
@@ -37,56 +63,58 @@
         width: 1.5em;
       }
 
-      .character.gsm {
-        background-color: var(--paper-blue-200);
+      #message-type.gsm,
+      .gsm {
+        background-color: var(--paper-grey-900);
       }
 
-      .character.gsm.double-char {
-        background-color: var(--paper-orange-300);
+      .gsm.double-true {
+        background-color: var(--paper-indigo-500);
       }
 
-      .character.ucs2 {
-        background-color: var(--paper-red-400);
+      #message-type.ucs2,
+      .ucs2 {
+        background-color: var(--paper-deep-orange-500);
+      }
+
+      .divider {
+        @apply --layout-flex-auto;
       }
     </style>
-    
-    <paper-textarea label="Enter message"
-                    value="{{text}}"
-                    invalid$="[[invalid]]"></paper-textarea>
-    <div class="char-counter">
-      <p>[[charCounter]] / [[limit]]</p>
+    <div id="text-box">
+      <paper-textarea label="Message"
+                      value="{{text}}"
+                      invalid$="[[invalid]]">
+      </paper-textarea>
+      <div id="text-box-footer">
+        <span id="message-type" class$="[[type]]">
+          [[type]]
+          <paper-tooltip>Message type</paper-tooltip>
+        </span>
+        <div class="divider"></div>
+        <span id="message-segments">
+          [[segments]] / [[limitSegments]]
+          <paper-tooltip>Segments</paper-tooltip>
+        </span>
+        <div class="divider"></div>
+        <span class="char-counter" invalid$="[[invalid]]">[[charCounter]] / [[_limit]]</span>
+      </div>
     </div>
     <div class="message">
-      <p class="message-data"></p>
-      <h4>LEGEND</h4>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <span class="character gsm"></span>
-            </td>
-            <td>Regular GSM character</td>
-          </tr>
-          <tr>
-            <td>
-              <span class="character gsm double-char"></span>
-            </td>
-            <td>GSM character that can be used for the cost of two characters</td>
-          </tr>
-          <tr>
-            <td>
-              <span class="character ucs2"></span>
-            </td>
-            <td>Character not present in GSM charset, forces to use UCS2 encoding</td>
-          </tr>
-        </tbody>
-      </table>
+      <p class="message-data">
+        <template is="dom-repeat" items="[[characters]]">
+          <span class$="character [[item.encode]] double-[[item.double]]">
+            [[item.text]]
+            <paper-tooltip>[[_labelCharacter(item)]]</paper-tooltip>
+          </span>
+        </template>
+      </p>
     </div>
   </template>
-
   <script src="./encoder-utils.js"></script>
-
   <script>
+    /* eslint-disable max-len */
+
     /**
      * `skeleton-sms-validator`
      *
@@ -97,14 +125,14 @@
     class SkeletonSmsValidator extends Polymer.Element {
       /**
        * @return {string}
-      */
+       */
       static get is() {
         return 'skeleton-sms-validator';
       }
 
       /**
        * @return {object}
-      */
+       */
       static get properties() {
         return {
           type: {
@@ -113,12 +141,17 @@
             reflectToAttribute: true,
             notify: true,
           },
-          segments: {
+          characters: {
             type: Array,
             value: [],
             reflectToAttribute: true,
             notify: true,
-            observer: '_segmentsObserver',
+          },
+          segments: {
+            type: Number,
+            value: 0,
+            reflectToAttribute: true,
+            notify: true,
           },
           invalid: {
             type: Boolean,
@@ -138,18 +171,33 @@
             value: null,
             reflectToAttribute: true,
             notify: true,
+            computed: '_computeData(invalid, text)',
           },
-          limit: {
-            type: Number,
-            value: null,
-          },
-          segmentsQty: {
+          limitSegments: {
             type: Number,
             value: 2,
           },
           charCounter: {
             type: Array,
             value: [],
+            computed: '_computeCharCounter(characters)',
+          },
+          _limit: {
+            type: Number,
+            value: 0,
+            computed: '_computeLimit(characters, type, limitSegments)',
+          },
+          labelGsm: {
+            type: String,
+            value: 'GSM character',
+          },
+          labelGsmDouble: {
+            type: String,
+            value: 'GSM character that costs two characters',
+          },
+          labelUcs2: {
+            type: String,
+            value: 'Character forces UCS2 encoding',
           },
         };
       }
@@ -159,13 +207,8 @@
        *
        * @return {array}
        */
-       static get observers() {
-        return [
-          // Observer method name, followed by a list of dependencies in
-          // parenthesis
-          '_messagesObserver(segments, type, segmentsQty)',
-          '_charsObserver(text)',
-        ];
+      static get observers() {
+        return [];
       }
 
       /**
@@ -173,48 +216,45 @@
        *
        * @param {string} text
        * @private
-      */
+       */
       _textObserver(text) {
-        if (!text) return;
-
-        const inputChars = encoderUtils.unicodeCharacters(text);
+        const baseText = text ? text : '';
+        const inputChars = encoderUtils.unicodeCharacters(baseText);
 
         this.type = encoderUtils.pickencoding(inputChars);
 
-        const segments = this.type === 'gsm'
-          ? encoderUtils._segmentWith(
-            160,
-            153,
+        const baseSegments = this.type === 'gsm'
+          ? encoderUtils._segmentWith(160, 153,
             encoderUtils.encodeCharGsm)(inputChars)
-          : encoderUtils._segmentWith(
-            140,
-            134,
+          : encoderUtils._segmentWith(140, 134,
             encoderUtils.encodeCharUtf16)(inputChars);
-
-        this.segments = segments.map((s) => s.bytes);
-
-        this.invalid = this.segments.length > this.segmentsQty;
-
-        if (!this.invalid) {
-          this.data = text;
-        } else {
-          this.data = null;
-        }
+        const segmentBytes = baseSegments[0] && baseSegments[0].bytes ? baseSegments[0].bytes : [];
+        this.characters = encoderUtils.unicodeCodePoints(baseText)
+          .map((char, index) => {
+            const encode = (char in unicodeToGsm) ? 'gsm' : 'ucs2';
+            const bytes = segmentBytes[index] ? segmentBytes[index] : 0;
+            const isDouble = (encode === 'gsm' && unicodeToGsm[char] && unicodeToGsm[char].length > 1);
+            return {
+              text: String.fromCodePoint(char),
+              encode: encode,
+              double: isDouble,
+              charBytes: bytes,
+              bytes: bytes.reduce((a, b) => a + b, 0),
+            };
+          });
+        this.segments = baseSegments.length;
+        this.invalid = baseSegments.length > this.limitSegments;
       }
 
       /**
        * Segments Observer
        *
+       * @param {Array} segments
+       * @return {number}
        * @private
        */
-      _segmentsObserver() {
-        if (!this.segments) return;
-
-        const totalChars = this.segments
-          .map((arr) => arr.reduce((acc, b) => acc + b.length, 0))
-          .reduce((acc, b) => acc + b, 0);
-
-        this.charCounter = totalChars;
+      _computeCharCounter(segments) {
+        return segments.map((arr) => arr.charBytes.length).reduce((a, b) => a + b, 0);
       }
 
       /**
@@ -222,62 +262,51 @@
        *
        * @param {Array} segments
        * @param {string} type
-       * @param {number} segmentsQty
+       * @param {number} limitSegments
+       * @return {number}
        * @private
        */
-      _messagesObserver(segments, type, segmentsQty) {
-        if (!type) return;
-
+      _computeLimit(segments, type, limitSegments) {
         if (type === 'gsm') {
           if (segments.length <= 1) {
-            this.limit = 160 * segmentsQty;
+            return 160 * limitSegments;
           } else {
-            this.limit = 153 * segmentsQty;
+            return 153 * limitSegments;
           }
+        }
+        if (segments.length <= 1) {
+          return 140 * limitSegments;
         } else {
-          if (segments.length <= 1) {
-            this.limit = 140 * segmentsQty;
-          } else {
-            this.limit = 134 * segmentsQty;
-          }
+          return 134 * limitSegments;
         }
       }
 
       /**
-       * Chars Observer
+       * Compute data
        *
-       * @param {string} text
+       * @param {boolean} invalid
+       * @param {string|null} text
+       * @return {string}
        * @private
        */
-       _charsObserver(text) {
-        if (!text) return;
+      _computeData(invalid, text) {
+        return invalid ? null : text;
+      }
 
-        const charData = this.shadowRoot.querySelector('.message-data');
-        const fragment = document.createDocumentFragment();
-
-        encoderUtils.unicodeCodePoints(text).map((char) => {
-          const span = document.createElement('span');
-
-          span.textContent = String.fromCodePoint(char);
-
-          span.classList.add('character');
-          if (char in unicodeToGsm) {
-            span.classList.add('gsm');
-            if (unicodeToGsm[char].length > 1) {
-              span.classList.add('double-char');
-            }
-          } else {
-            span.classList.add('ucs2');
-          }
-
-          return span;
-        }).reduce((acc, span) => {
-          acc.appendChild(span);
-          return acc;
-        }, fragment);
-
-        charData.innerHTML = '';
-        charData.appendChild(fragment);
+      /**
+       * Return label character
+       * @param {object} character
+       * @return {string}
+       * @private
+       */
+      _labelCharacter(character) {
+        let text = 'unknown';
+        if (character.encode === 'gsm') {
+          text = character.double ? this.labelGsmDouble : this.labelGsm;
+        } else if (character.encode === 'ucs2') {
+          text = this.labelUcs2;
+        }
+        return text;
       }
     }
 

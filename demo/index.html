@@ -1,46 +1,46 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>skeleton-sms-validator demo</title>
+  <title>skeleton-sms-validator demo</title>
 
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 
-    <link rel="import" href="../../polymer/lib/elements/dom-bind.html">
-    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
-    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
-    <link rel="import" href="../skeleton-sms-validator.html">
+  <link rel="import" href="../../polymer/lib/elements/dom-bind.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../skeleton-sms-validator.html">
 
-    <custom-style>
-      <style is="custom-style" include="demo-pages-shared-styles">
-        p {
-          word-wrap: break-word;
-        }
-      </style>
-    </custom-style>
-  </head>
-  <body>
-    <div class="vertical-section-container centered">
-      <h3>Basic skeleton-sms-validator demo</h3>
-      <demo-snippet>
+  <custom-style>
+    <style is="custom-style" include="demo-pages-shared-styles">
+      p {
+        word-wrap: break-word;
+      }
+    </style>
+  </custom-style>
+</head>
+<body>
+<div class="vertical-section-container centered">
+  <h3>Basic skeleton-sms-validator demo</h3>
+  <demo-snippet>
+    <template>
+      <dom-bind>
         <template>
-          <dom-bind>
-            <template>
-              <skeleton-sms-validator 
-                segments="{{segments}}"
-                text="{{text}}"
-                type="{{type}}"></skeleton-sms-validator>
-              <div>
-                <p>Type: [[type]]</p>
-                <p>SMS Segments: [[segments.length]]</p>
-                <p>[[segments]]</p>
-              </div>
-            </template>
-          </dom-bind>
+          <skeleton-sms-validator segments="{{segments}}"
+                                  text="{{text}}"
+                                  type="{{type}}"
+                                  limit-segments="2"
+          ></skeleton-sms-validator>
+          <div>
+            <p>SMS Segments: [[segments]]</p>
+            <p>[[segments]]</p>
+          </div>
         </template>
-      </demo-snippet>
-    </div>
-  </body>
+      </dom-bind>
+    </template>
+  </demo-snippet>
+</div>
+</body>
 </html>
