@@ -1,21 +1,60 @@
-# \<skeleton-sms-validator\>
+## \<skeleton-sms-validator\>
 
+`skeleton-sms-validator` is a [Polymer 2](http://polymer-project.org) element to check SMS length and encoding type.
 
+## Installation
 
-## Install the Polymer-CLI
+Install skeleton-sms-validator with Bower
 
-First, make sure you have the [Polymer CLI](https://www.npmjs.com/package/polymer-cli) installed. Then run `polymer serve` to serve your element locally.
-
-## Viewing Your Element
-
-```
-$ polymer serve
+```shell
+$ bower install --save FabricElements/skeleton-sms-validator
 ```
 
-## Running Tests
+## Usage
 
-```
-$ polymer test
+Import it into the `<head>` of your page
+
+```html
+<link rel="import" href="bower_components/skeleton-sms-validator/skeleton-sms-validator.html">
 ```
 
-Your application is already set up to be tested via [web-component-tester](https://github.com/Polymer/web-component-tester). Run `polymer test` to run your application's test suite locally.
+### Example: basic usage
+
+Add the `skeleton-sms-validator` element.
+
+```html
+<skeleton-sms-validator segments="{{segments}}"
+                        value="{{value}}"
+                        type="{{type}}"
+                        characters="{{characters}}"
+                        limit-segments="2"></skeleton-sms-validator>
+```
+
+### Attributes
+
+* `segments` (number) - The SMS parts.
+* `value` (string) - The text value.
+* `type` (string) - The encoding type.
+* `characters` (array) - SMS chars array
+* `limit-segments` (number) - Limits the parts an SMS should have.
+
+### Other attributes
+
+* `invalid` (boolean) - True if SMS parts exceed limitSegments.
+* `charCounter` (array) - The input char counter.
+* `_limit` (number) - Limits the char qty by encoding type and segments limit.
+* `labelGsm` (string) - GSM label
+* `labelGsmDouble` (string) - GSM double chars label.
+* `labelUcs2` (string) - UCS2 label.
+
+## Contributing
+
+Please check [CONTRIBUTING](./CONTRIBUTING.md).
+
+## Acknowledgments
+
+[encoder-utils.js](./encoder-utils.js) is based on [chadselph/smssplit](https://github.com/chadselph/smssplit) by Chad Selph.
+
+## License
+
+Released under the [BSD 3-Clause License](./LICENSE.md).
