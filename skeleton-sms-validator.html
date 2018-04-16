@@ -247,20 +247,24 @@
             encoderUtils.encodeCharGsm)(inputChars)
           : encoderUtils._segmentWith(140, 134,
             encoderUtils.encodeCharUtf16)(inputChars);
-        const segmentBytes = baseSegments[0] && baseSegments[0].bytes ? baseSegments[0].bytes : [];
-        this.characters = encoderUtils.unicodeCodePoints(baseText)
-          .map((char, index) => {
-            const encode = (char in unicodeToGsm) ? 'gsm' : 'ucs2';
-            const bytes = segmentBytes[index] ? segmentBytes[index] : [];
-            const isDouble = (encode === 'gsm' && unicodeToGsm[char] && unicodeToGsm[char].length > 1);
-            return {
-              text: String.fromCodePoint(char),
-              encode: encode,
-              double: isDouble,
-              charBytes: bytes,
-              bytes: bytes.reduce((a, b) => a + b, 0),
-            };
-          });
+
+        this.characters = baseSegments.reduce((acc, segment) => {
+          const chars = segment.text
+            .map((char, i) => {
+              const utfChar = encoderUtils.unicodeCodePoints(char)[0];
+
+              return {
+                bytes: segment.bytes[i].length,
+                charBytes: segment.bytes[i],
+                double: (utfChar in unicodeToGsm) && unicodeToGsm[utfChar].length > 1,
+                encode: (utfChar in unicodeToGsm) ? 'gsm' : 'ucs2',
+                text: char,
+              };
+            });
+
+          return acc.concat(chars);
+        }, []);
+
         this.segments = baseSegments.length;
         this.invalid = baseSegments.length > this.limitSegments;
       }
@@ -273,7 +277,7 @@
        * @private
        */
       _computeCharCounter(chars) {
-        return chars.map((arr) => arr.charBytes.length).reduce((a, b) => a + b, 0);
+        return chars.map((char) => char.bytes).reduce((a, b) => a + b, 0);
       }
 
       /**
