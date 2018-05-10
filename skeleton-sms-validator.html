@@ -84,7 +84,8 @@
     <div id="text-box">
       <paper-textarea label="Message"
                       value="{{value}}"
-                      invalid$="[[invalid]]">
+                      invalid$="[[invalid]]"
+                      always-float-label="[[alwaysFloatLabel]]">
       </paper-textarea>
       <div id="text-box-footer">
         <span id="message-type" class$="[[type]]">
@@ -226,6 +227,13 @@
           labelUcs2: {
             type: String,
             value: 'Character forces UCS2 encoding',
+          },
+          /**
+           * Always float label
+           */
+           alwaysFloatLabel: {
+            type: Boolean,
+            value: false,
           },
         };
       }
