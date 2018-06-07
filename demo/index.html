@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
   <title>skeleton-sms-validator demo</title>
-
-  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-
-  <link rel="import" href="../../polymer/lib/elements/dom-bind.html">
-  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
-  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
-  <link rel="import" href="../skeleton-sms-validator.html">
-
+  
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
+  <script type="module">
+    import '@polymer/polymer/lib/elements/dom-bind.js';
+    import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
+    import '@polymer/iron-demo-helpers/demo-snippet';
+    import '../skeleton-sms-validator.js';
+  </script>
   <custom-style>
     <style is="custom-style" include="demo-pages-shared-styles">
       p {
@@ -22,17 +22,17 @@
   </custom-style>
 </head>
 <body>
-<div class="vertical-section-container centered">
-  <h3>Basic skeleton-sms-validator demo</h3>
-  <demo-snippet>
-    <template>
-      <dom-bind>
-        <template>
-          <skeleton-sms-validator limit-segments="1"></skeleton-sms-validator>
-        </template>
-      </dom-bind>
-    </template>
-  </demo-snippet>
-</div>
+  <div class="vertical-section-container centered">
+    <h3>Basic skeleton-sms-validator demo</h3>
+    <demo-snippet>
+      <template>
+        <dom-bind>
+          <template>
+            <skeleton-sms-validator limit-segments="1"></skeleton-sms-validator>
+          </template>
+        </dom-bind>
+      </template>
+    </demo-snippet>
+  </div>
 </body>
 </html>
