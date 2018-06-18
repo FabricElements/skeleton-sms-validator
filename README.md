@@ -1,13 +1,13 @@
 ## \<skeleton-sms-validator\>
 
-`skeleton-sms-validator` is a [Polymer 2](http://polymer-project.org) element to check SMS length and encoding type.
+`skeleton-sms-validator` is a [Polymer 3](http://polymer-project.org) element to check SMS length and encoding type.
 
 ## Installation
 
-Install skeleton-sms-validator with Bower
+Install skeleton-sms-validator with npm
 
 ```shell
-$ bower install --save FabricElements/skeleton-sms-validator
+$ npm install FabricElements/skeleton-sms-validator --save
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ $ bower install --save FabricElements/skeleton-sms-validator
 Import it into the `<head>` of your page
 
 ```html
-<link rel="import" href="bower_components/skeleton-sms-validator/skeleton-sms-validator.html">
+<script type="module" src="node_modules/@fabricelements/skeleton-sms-validator/skeleton-sms-validator.js"></script>
 ```
 
 ### Example: basic usage
