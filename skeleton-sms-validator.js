@@ -266,6 +266,18 @@ class SkeletonSmsValidator extends PolymerElement {
   }
 
   /**
+   * Set caret position
+   *
+   * @param {number} start
+   * @param {number} end
+   */
+  setCaretPosition(start, end) {
+    if (!start && !end) return;
+    const textarea = this.shadowRoot.getElementById('sms-textarea');
+    textarea._focusableElement.setSelectionRange(start, end);
+  }
+
+  /**
    * Text Observer
    *
    * @param {string} text
