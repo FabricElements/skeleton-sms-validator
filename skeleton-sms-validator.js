@@ -97,7 +97,11 @@ class SkeletonSmsValidator extends PolymerElement {
       }
     </style>
     <div id="text-box">
-      <paper-textarea label="Message" value="{{value}}" invalid\$="[[invalid]]" always-float-label="[[alwaysFloatLabel]]">
+      <paper-textarea label="Message"
+                      value="{{value}}"
+                      invalid$="[[invalid]]"
+                      always-float-label="[[alwaysFloatLabel]]"
+                      id="sms-textarea">
       </paper-textarea>
       <div id="text-box-footer">
         <span id="message-type" class\$="[[type]]">
@@ -238,7 +242,27 @@ class SkeletonSmsValidator extends PolymerElement {
         type: Boolean,
         value: false,
       },
+      cursorStart: {
+        type: Number,
+        value: 0,
+        notify: true,
+      },
+      cursorEnd: {
+        type: Number,
+        value: 0,
+        notify: true,
+      },
     };
+  }
+
+  /**
+   * Focus
+   */
+  focus() {
+    const textarea = this.shadowRoot.getElementById('sms-textarea');
+    textarea.focus();
+    this.cursorEnd = textarea.selectionEnd;
+    this.cursorStart = textarea.selectionStart;
   }
 
   /**
