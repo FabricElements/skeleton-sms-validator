@@ -113,6 +113,7 @@ class SkeletonSmsValidator extends PolymerElement {
         <span class="char-counter" invalid\$="[[invalid]]">[[charCounter]] / [[_limit]]</span>
       </div>
     </div>
+    <div><slot name="tags"></slot></div>
     <div class="message">
       <p class="message-data">
         <template is="dom-repeat" items="[[characters]]">
