@@ -97,7 +97,11 @@ class SkeletonSmsValidator extends PolymerElement {
       }
     </style>
     <div id="text-box">
-      <paper-textarea label="Message" value="{{value}}" invalid\$="[[invalid]]" always-float-label="[[alwaysFloatLabel]]">
+      <paper-textarea label="Message"
+                      value="{{value}}"
+                      invalid$="[[invalid]]"
+                      always-float-label="[[alwaysFloatLabel]]"
+                      id="sms-textarea">
       </paper-textarea>
       <div id="text-box-footer">
         <span id="message-type" class\$="[[type]]">
@@ -113,6 +117,7 @@ class SkeletonSmsValidator extends PolymerElement {
         <span class="char-counter" invalid\$="[[invalid]]">[[charCounter]] / [[_limit]]</span>
       </div>
     </div>
+    <div><slot name="tags"></slot></div>
     <div class="message">
       <p class="message-data">
         <template is="dom-repeat" items="[[characters]]">
@@ -237,7 +242,39 @@ class SkeletonSmsValidator extends PolymerElement {
         type: Boolean,
         value: false,
       },
+      cursorStart: {
+        type: Number,
+        value: 0,
+        notify: true,
+      },
+      cursorEnd: {
+        type: Number,
+        value: 0,
+        notify: true,
+      },
     };
+  }
+
+  /**
+   * Focus
+   */
+  focus() {
+    const textarea = this.shadowRoot.getElementById('sms-textarea');
+    textarea.focus();
+    this.cursorEnd = textarea.selectionEnd;
+    this.cursorStart = textarea.selectionStart;
+  }
+
+  /**
+   * Set caret position
+   *
+   * @param {number} start
+   * @param {number} end
+   */
+  setCaretPosition(start, end) {
+    if (!start && !end) return;
+    const textarea = this.shadowRoot.getElementById('sms-textarea');
+    textarea._focusableElement.setSelectionRange(start, end);
   }
 
   /**
